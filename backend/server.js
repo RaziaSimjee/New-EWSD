@@ -60,8 +60,22 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/ideas', ideaRoutes);
 
-// Serve uploaded images as static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+if (process.env.NODE_ENV === 'production') {
+  const __dirname = path.resolve();
+  // Serve uploaded images as static files
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+  // Serve static files from the React frontend build
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+  // Serve the React app for all unknown routes (handle client-side routing)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+  });
+} else {
+  const __dirname = path.resolve();
+  // Serve uploaded images as static files
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+}
 
 // Use the upload routes
 app.use('/api/ideas', uploadRoutes);
